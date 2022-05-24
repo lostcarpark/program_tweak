@@ -403,7 +403,7 @@ if (is_null($parameters)) {
   echo "Required parameters:\n";
   echo "  --start or -s  The new start date\n";
   echo "  --input or -i <combined program and people.json>   OR\n";
-  echo "  --input or -o <program.json> <people.json>\n";
+  echo "  --input or -i <program.json> <people.json>\n";
   echo "  --output or -o <combined program and people output.json>  OR\n";
   echo "  --output or -o <program output.json> <people output.json>\n";
   echo "Optional flags:\n";
