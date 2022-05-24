@@ -32,6 +32,7 @@ function extractParameters($argc, $argv)
     'numeric' => false,
     'guid' => false,
     'json' => false,
+    'timezone' => false,
   ];
   for ($param = 1; $param < $argc; $param++) {
     switch ($argv[$param]) {
@@ -82,6 +83,10 @@ function extractParameters($argc, $argv)
       case '-J':
       case '--json':
         $parameters->json = true;
+        break;
+      case '-t':
+      case '--timezone':
+        $parameters->timezone = true;
         break;
       default:
         echo "Unknown parameter: " . $argv[$param] . "\n";
@@ -246,26 +251,35 @@ function findOldestDate($program)
  * @param bool $split
  * @return array
  */
-function addOffsetToDates($program, $offset, $join, $split)
+function addOffsetToDates($program, $offset, $join, $split, $timezone)
 {
   foreach ($program as $item) {
     if (isset($item->datetime)) {
-      $oldTime = strtotime($item->datetime);
+      if (strlen($item->datetime) > 19) {
+        $oldTime = strtotime($item->datetime);
+      }
+      else {
+        $oldTime = strtotime($item->datetime . '+00:00');
+      }
       $isDateTime = true;
       unset($item->datetime);
     } else {
-      $oldTime = strtotime($item->date . 'T' . $item->time);
+      $oldTime = strtotime($item->date . 'T' . $item->time . '+00:00');
       $isDateTime = false;
       unset($item->date);
       unset($item->time);
     }
     $newTime = $oldTime + $offset;
     if ($join || (!$split && $isDateTime)) {
-      $item->datetime = substr(date("c", $newTime), 0, 19);
+      if ($timezone) {
+        $item->datetime = gmdate("c", $newTime);
+      } else {
+        $item->datetime = substr(gmdate("c", $newTime), 0, 19);
+      }
     }
     if ($split || (!$join && !$isDateTime)) {
-      $item->date = date("Y-m-d", $newTime);
-      $item->time = date("H:i:s", $newTime);
+      $item->date = gmdate("Y-m-d", $newTime);
+      $item->time = gmdate("H:i:s", $newTime);
     }
   }
   return $program;
@@ -412,6 +426,7 @@ if (is_null($parameters)) {
   echo "  --numeric or -n  Replace keys with numeric values\n";
   echo "  --guid or -g  Replace keys with GUIDs\n";
   echo "  --json or -J  Output in plain JSON without `var` statements.\n";
+  echo "  --timezone or -t  Include timezone in joined datetime output.\n";
   exit(0);
 }
 
@@ -432,7 +447,7 @@ if (count($parameters->input) == 1) {
 $oldest = strtotime(findOldestDate($program));
 $offset = $newStartDate - $oldest;
 
-$program = addOffsetToDates($program, $offset, $parameters->joindate, $parameters->splitdate);
+$program = addOffsetToDates($program, $offset, $parameters->joindate, $parameters->splitdate, $parameters->timezone);
 if ($parameters->guid || $parameters->numeric) {
   replaceIDs($program, $people, $parameters->guid);
 }

@@ -23,3 +23,4 @@ Call as follows:
   - `--numeric` or `-n`  Replace keys with numeric values
   - `--guid` or `-g`  Replace keys with GUIDs
   - `--json` or `-J`  Output in plain JSON without `var` statements.
+  - `--timezone` or `-t`  Include timezone in joined datetime output.
