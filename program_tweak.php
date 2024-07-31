@@ -440,9 +440,9 @@ if (count($parameters->input) == 1) {
   list($program, $people) = parseJson($inputData);
 } else {
   $inputData = file_get_contents($parameters->input[0]);
-  $program = $inputData[0];
+  $program = parseJson($inputData)[0];
   $inputData = file_get_contents($parameters->input[1]);
-  $people = $inputData[0];
+  $people = parseJson($inputData)[0];
 }
 $oldest = strtotime(findOldestDate($program));
 $offset = $newStartDate - $oldest;
